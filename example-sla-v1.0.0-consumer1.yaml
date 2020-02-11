@@ -1,0 +1,97 @@
+opensla: 1.0.0
+
+info:
+  title: SLA Example
+  description: Example SLA comprising most features of the OpenSLA
+  version: 1.0.0
+  variant: consumer1
+
+oas:
+  url: https://url-to-api-oas/
+  versions:
+  - version: 1.0.0
+    url: '?v=1.0.0'
+
+support:
+  channels:
+    - name: email
+      uri: team_support.dl@example.com
+      levels: [p1, p2]
+    - name: jira
+      uri: https://jira4.example.com/team_name/
+      levels: [p2]
+    - name: slack
+      uri: #team_support
+      levels: [p1, p2]
+    - name: phone
+      uri: +44 (0)1234 567890
+      note: Phone active outside of normal UK working hours
+      levels: [p1]
+  levels:
+    - name: p1
+      description: Priority 1 support
+      response: 60
+      fix: 240
+      relevance:
+        - Production Issues
+        - 5xx HTTP Status responses
+    - name: p2
+      description: Priority 2 support
+      response: 720
+  versions:
+    concurrentSupported: 2
+    supportedLifetime: 1 Year from date of release
+
+continuity:
+  multiDatacentre: true
+  multiInstance: true
+  configuration: active-active
+
+recovery:
+  rpo: 5
+  rto: 1
+
+runtime:
+  - name: default
+    availability: 99.5
+    concurrency: 40
+    throughput:
+      - rps: 10
+        latency:
+          - percentile: 99
+            maximum: 500
+            mean: 80
+    5xxResponsePercent: 1
+
+limits:
+  - name: read operations peak hours
+    operationIds: [ getDataList, getDataItem ]
+    totals:
+      period: 4000
+    rate:
+      value: 100
+      duration: minute
+    concurrent: 4
+    validity:
+      - name: peak hours morning
+        start: 06:00
+        end: 10:13:50
+      - name: peak hours evening
+        start: 16:30
+        end: 20:00
+  - name: read operations all hours
+    operationIds: [ getDataList, getDataItem ]
+    totals:
+      hour: 2000
+      day: 50000
+      week: 100000
+    rate:
+      value: 2
+      duration: second
+  - name: all operations
+    totals:
+      week: 25000
+    concurrent: 2
+    rate:
+      value: 1
+      duration: second

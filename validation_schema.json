@@ -1,0 +1,404 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://apinfinity.net/opensla_schema.json",
+    "title": "Open SLA",
+    "description": "Validation schema for Open SLA documents",
+    "type": "object",
+    "properties": {
+        "opensla": {
+            "description": "Denotes the version of the Open SLA standard the document is written for",
+            "type": "string",
+            "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "info": {
+            "description": "Information about the SLA",
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "description": "A description of what the SLA applies to"
+                },
+                "variant": {
+                    "type": "string",
+                    "description": "The specific variant of SLA that is represented by this document",
+                    "minLength": 1
+                },
+                "version": {
+                    "type": "string",
+                    "description": "The version of the SLA",
+                    "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+                }
+            },
+            "required": ["title", "version"]
+        },
+        "oas": {
+            "description": "Section which links to the relevant Open API Specifications",
+            "type": "object",
+            "properties": {
+                "url": {
+                    "description": "The default url of the OAS referenced in the versions element",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "versions": {
+                    "description": "A list of versions of the OAS which this SLA document is applied",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "version": {
+                                "description": "The version of the OAS",
+                                "type": "string",
+                                "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+                            },
+                            "url": {
+                                "description": "A relative (to the oas default Url) or absolute Url to the specification for the version",
+                                "type": "string"
+                            }
+                        },
+                        "required": ["version"]
+                    },
+                    "minItems": 1,
+                    "uniqueItems": true
+                }
+            },
+            "required": ["url", "versions"]
+        },
+        "support": {
+            "description": "Describes the Support options relating to the SLA",
+            "type": "object",
+            "properties": {
+                "channels": {
+                    "description": "The channels by which support can be slought",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "description": "A unique and descriptive name for the channel",
+                                "type": "string",
+                                "minLength": 1
+                            },
+                            "uri": {
+                                "description": "A URI identifying how to interact with the channel",
+                                "type": "string",
+                                "minLength": 1
+                            },
+                            "levels": {
+                                "description": "The levels of support which are handled by the channel",
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "minLength": 1
+                                }
+                            }
+                        },
+                        "required": ["name", "uri", "levels"]
+                    },
+                    "minItems": 1,
+                    "uniqueItems": true
+                },
+                "levels": {
+                    "description": "The definition of the levels of support offered by the API Team",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "description": "A unique and descriptive name for the support level",
+                                "type": "string",
+                                "minLength": 1
+                            },
+                            "description": {
+                                "description": "A descrition of the support level",
+                                "type": "string",
+                                "minLength": 1
+                            },
+                            "response": {
+                                "description": "Number of minutes within which a response will be made",
+                                "type": "integer",
+                                "minimum": 0
+                            },
+                            "fix": {
+                                "description": "The time in minutes until the issue is fixed",
+                                "type": "integer",
+                                "minimum": 0
+                            },
+                            "relevance": {
+                                "description": "A list of topics which are relevant to the level of support request",
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "minLength": 1
+                                },
+                                "minItems": 1,
+                                "uniqueItems": true
+                            }
+                        },
+                        "required": ["name"]
+                    }
+                },
+                "versions": {
+                    "description": "Information about Supported versions",
+                    "type": "object",
+                    "properties": {
+                        "concurrentSupported": {
+                            "description": "The number of API Versions that will be supported at the same time",
+                            "type": "integer",
+                            "minimum": 1
+
+                        },
+                        "supportedLifetime": {
+                            "description": "The minimum length of time an API version will be supported",
+                            "type": "string",
+                            "minLength": 1
+                        }
+                    }
+                }
+            },
+            "required": ["channels", "levels"]
+        },
+        "continuity": {
+            "description": "The Business Continuity section",
+            "type": "object",
+            "properties": {
+                "mutliDatacentre": {
+                    "description": "If the Implementations are hosted across multiple data centres",
+                    "type": "boolean"
+                },
+                "multiInstance": {
+                    "description": "If there are multiple instances of the implementations run concurrently",
+                    "type": "boolean"
+                },
+                "configuration": {
+                    "description": "The configuration mode of the applcation servicing the API calls",
+                    "enum": ["Active-Active", "Active-Passive"]
+                }
+            }
+        },
+        "recovery": {
+            "description": "The Data and service recovery section",
+            "type": "object",
+            "properties": {
+                "rpo": {
+                    "description": "the Recovery Point Objective, in minutes from the point of disaster",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "rto": {
+                    "description": "the Recovery Time Objective, in minutes from the point of disaster",
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        },
+        "runtime": {
+            "description": "Runtime measurable SLA objectives",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "The runtime definition name",
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "operationIds": {
+                        "description": "List of OAS operationIds to which the definition applies",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "minItems": 1,
+                        "uniqueItems": true
+                    },
+                    "validity": {
+                        "description": "When the definition is valid",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "The validity timeperiod name",
+                                    "type": "string",
+                                    "minLength": 1
+                                },
+                                "start": {
+                                    "description": "The validity start time",
+                                    "type": "string",
+                                    "format": "time"
+                                },
+                                "end": {
+                                    "description": "The validity end time",
+                                    "type": "string",
+                                    "format": "time"
+                                }
+                            },
+                            "required": ["name", "start", "end"]
+                        },
+                        "minItems": 1,
+                        "uniqueItems": true
+                    },
+                    "availability": {
+                        "description": "The percentage of the validity period that the API is expected to be available to service requests",
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 100
+                    },
+                    "throughput": {
+                        "description": "The throughput and latency measures for the runtime definition",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "rps": {
+                                    "description": "The Requests Per Second value for the throughput",
+                                    "type": "number",
+                                    "exclusiveMinimum": 0
+                                },
+                                "latency": {
+                                    "description": "The latency figures for the RPS value",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "percentile": {
+                                                "description": "The percentile figure the latency represents",
+                                                "type": "number",
+                                                "exclusiveMinimum": 0,
+                                                "maximum": 100
+                                            },
+                                            "maximum": {
+                                                "description": "The maximum latency value in milliseconds",
+                                                "type": "integer",
+                                                "minimum": 0
+                                            },
+                                            "mean": {
+                                                "description": "The mean latency value in milliseconds",
+                                                "type": "integer",
+                                                "minimum": 0
+                                            }
+                                        },
+                                        "required": ["percentile"]
+                                    }
+                                }
+                            },
+                            "required": ["rps", "latency"]
+                        }
+                    },
+                    "5xxResponsePercent": {
+                        "description": "The expected percentage of responses that will have a 5xx series Status code",
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 100
+                    }
+                },
+                "required": ["name", "operationIds", "validity", "availability", "throughput"]
+            }
+        },
+        "limits": {
+            "description": "Consumer Limits",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "The limit definition name",
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "operationIds": {
+                        "description": "List of OAS operationIds to which the definition applies",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "minItems": 1,
+                        "uniqueItems": true
+                    },
+                    "totals": {
+                        "description": "An object representing the 'totals' (or counts) and the periods over which they are applied.",
+                        "type": "object",
+                        "properties": {
+                            "period": {
+                                "description": "The maximum number of requests allowed over the entire period defined by the Validity entries.",
+                                "type": "integer",
+                                "minimum": 1
+                            },
+                            "minute": {
+                                "description": "The maximum number of requests allowed per minute.",
+                                "type": "integer",
+                                "minimum": 1
+                            },
+                            "hour": {
+                                "description": "The maximum number of requests allowed per hour.",
+                                "type": "integer",
+                                "minimum": 1
+                            },
+                            "day": {
+                                "description": "The maximum number of requests allowed per day.",
+                                "type": "integer",
+                                "minimum": 1
+                            },
+                            "week": {
+                                "description": "The maximum number of requests allowed per week.",
+                                "type": "integer",
+                                "minimum": 1
+                            }
+                        }
+                    },
+                    "rate": {
+                        "description": "An object representing the maximum request rate for the consumer",
+                        "type": "object",
+                        "properties": {
+                            "value": {
+                                "description": "The maximum number of requests allowed over unit of time as defined by the duration property.",
+                                "type": "integer",
+                                "minimum": 1 
+                            },
+                            "duration": {
+                                "description": "The unit of time over which the value is applied.",
+                                "enum": ["second", "minute", "hour", "day", "week"]
+                            }
+                        },
+                        "required": ["value", "duration"]
+                    },
+                    "concurrent": {
+                        "description": "The maximum number of concurrent requests that is allowed from one consumer.",
+                        "type": "integer"
+                    },
+                    "validity": {
+                        "description": "When the definition is valid",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "The validity timeperiod name",
+                                    "type": "string",
+                                    "minLength": 1
+                                },
+                                "start": {
+                                    "description": "The validity start time",
+                                    "type": "string",
+                                    "format": "time"
+                                },
+                                "end": {
+                                    "description": "The validity end time",
+                                    "type": "string",
+                                    "format": "time"
+                                }
+                            },
+                            "required": ["name", "start", "end"]
+                        },
+                        "minItems": 1,
+                        "uniqueItems": true
+                    }
+                }
+            }
+        }
+    },
+    "required": ["opensla"]
+}
