@@ -21,7 +21,7 @@ support:
       uri: https://jira4.example.com/team_name/
       levels: [p2]
     - name: slack
-      uri: #team_support
+      uri: /#team_support
       levels: [p1, p2]
     - name: phone
       uri: +44 (0)1234 567890
